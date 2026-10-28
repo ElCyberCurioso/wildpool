@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>WildPool — billar con amigos</title>
+  <meta name="description" content="Billar online en el navegador: salas privadas con enlace de invitación, chat, Bola 8, Bola 9, Killer y Carambola. Personaliza taco, mesa y bolas.">
+  <meta name="theme-color" content="#23130F">
+  <meta property="og:title" content="WildPool — te han invitado a una partida de billar">
+  <meta property="og:description" content="Entra en la sala con un clic: Bola 8, Bola 9, Killer y Carambola en el navegador.">
+  <meta property="og:type" content="website">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@400;500;600;700&family=Shrikhand&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <script src="js/vendor/peerjs.min.js" defer></script>
+  <script type="module" src="js/main.js"></script>
+</head>
+<body>
+  <main id="app">
+
+    <!-- ============================================================ INICIO -->
+    <section id="screen-home" class="screen">
+      <div class="home-copy">
+        <h1 class="logo">WildPool</h1>
+        <p class="tagline">Billar entre amigos. Crea una sala, pasa el enlace y a jugar.</p>
+
+        <div class="profile-row">
+          <button class="avatar-btn" id="home-avatar" type="button" aria-label="Cambiar avatar"></button>
+          <label class="field grow">
+            <span>Tu nombre</span>
+            <input id="home-name" maxlength="18" autocomplete="nickname" placeholder="¿Cómo te llamas?">
+          </label>
+        </div>
+
+        <div class="block">
+          <h2>Online</h2>
+          <button class="btn primary big" id="btn-create" type="button">Crear sala privada</button>
+          <form class="join-row" id="join-form">
+            <label class="sr-only" for="join-code">Código de sala</label>
+            <input id="join-code" placeholder="Código de sala" maxlength="12" autocomplete="off" spellcheck="false" autocapitalize="characters">
+            <button class="btn" type="submit">Unirse</button>
+          </form>
+        </div>
+
+        <div class="block">
+          <h2>En este dispositivo</h2>
+          <div class="btn-row">
+            <button class="btn" id="btn-cpu" type="button">Contra la CPU</button>
+            <button class="btn" id="btn-local" type="button">Dos jugadores</button>
+            <button class="btn" id="btn-practice" type="button">Práctica</button>
+          </div>
+        </div>
+
+        <button class="link-btn" id="btn-custom" type="button">Personalizar taco, mesa y bolas</button>
+      </div>
+      <div class="home-stage" aria-hidden="true">
+        <canvas id="hero-canvas"></canvas>
+      </div>
+    </section>
+
+    <!-- ============================================================ PERSONALIZAR -->
+    <section id="screen-custom" class="screen" hidden>
+      <header class="bar">
+        <button class="btn ghost" id="custom-back" type="button">Volver</button>
+        <h2>Personalizar</h2>
+      </header>
+      <div class="custom-layout">
+        <div class="custom-preview"><canvas id="custom-canvas"></canvas></div>
+        <div class="custom-panel">
+          <div class="tabs" role="tablist">
+            <button role="tab" data-tab="cue" aria-selected="true" type="button">Taco</button>
+            <button role="tab" data-tab="table" aria-selected="false" type="button">Mesa</button>
+            <button role="tab" data-tab="balls" aria-selected="false" type="button">Bolas</button>
+            <button role="tab" data-tab="profile" aria-selected="false" type="button">Perfil y sonido</button>
+          </div>
+          <div class="tab-body" id="custom-body" role="tabpanel"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================ SALA -->
+    <section id="screen-lobby" class="screen" hidden>
+      <header class="bar">
+        <button class="btn ghost" id="lobby-leave" type="button">Salir</button>
+        <div class="room-id"><span>Sala</span><strong id="lobby-code"></strong></div>
+        <div class="spacer"></div>
+        <button class="btn ghost hide-sm" id="lobby-custom" type="button">Personalizar</button>
+        <button class="btn" id="lobby-copy" type="button">Copiar enlace</button>
+        <button class="btn" id="lobby-share" type="button" hidden>Compartir</button>
+      </header>
+      <div class="lobby-layout">
+        <div class="lobby-main">
+          <section class="panel">
+            <div class="panel-head">
+              <h3>En la sala</h3>
+              <div class="seg" id="lobby-role" role="group" aria-label="Tu papel">
+                <button type="button" data-role="player">Jugar</button>
+                <button type="button" data-role="spectator">Mirar</button>
+              </div>
+            </div>
+            <ul id="lobby-members" class="members"></ul>
+            <p class="invite-hint">Comparte el enlace: quien lo abra entra directamente en esta sala.</p>
+          </section>
+          <section class="panel">
+            <div class="panel-head"><h3>Partida</h3><span class="muted" id="lobby-owner"></span></div>
+            <div id="lobby-settings"></div>
+          </section>
+          <div class="start-row">
+            <p id="lobby-hint" class="muted"></p>
+            <button class="btn primary big" id="lobby-start" type="button">Empezar partida</button>
+          </div>
+        </div>
+        <aside class="lobby-chat" id="lobby-chat-slot"></aside>
+      </div>
+    </section>
+
+    <!-- ============================================================ PARTIDA -->
+    <section id="screen-game" class="screen" hidden>
+      <header class="scoreboard" id="scoreboard"></header>
+      <div class="game-main">
+        <div class="table-wrap" id="table-wrap">
+          <canvas id="table-canvas"></canvas>
+          <p class="game-status" id="game-status" aria-live="polite"></p>
+          <div class="toasts" id="toasts" aria-live="polite"></div>
+          <div class="over-card" id="over-card" hidden></div>
+        </div>
+        <div class="rail-controls">
+          <div class="rail-buttons">
+            <button class="icon-btn" id="btn-menu" type="button" aria-label="Menú">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+            </button>
+            <button class="icon-btn" id="btn-chat" type="button" aria-label="Chat">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5h14v10H10l-5 4z"/></svg>
+              <span class="badge" id="chat-badge" hidden></span>
+            </button>
+          </div>
+          <div class="power" id="power">
+            <div class="power-track" title="Arrastra para dar potencia y suelta para tirar"><div class="power-fill"></div></div>
+            <span>Potencia</span>
+          </div>
+          <div class="fine">
+            <button type="button" data-fine="-1" aria-label="Ajuste fino a la izquierda">‹</button>
+            <button type="button" data-fine="1" aria-label="Ajuste fino a la derecha">›</button>
+          </div>
+          <div class="spin">
+            <canvas id="spin-canvas" title="Toca para dar efecto; doble clic para centrar"></canvas>
+            <span>Efecto</span>
+          </div>
+        </div>
+        <aside class="game-chat" id="game-chat-slot"></aside>
+      </div>
+    </section>
+
+    <!-- ============================================================ CHAT (se mueve entre sala y partida) -->
+    <div class="chat" id="chat">
+      <div class="chat-head">
+        <strong>Chat de la sala</strong>
+        <button class="icon-btn small" id="chat-close" type="button" aria-label="Cerrar chat">✕</button>
+      </div>
+      <ol class="chat-list" id="chat-list" aria-live="polite"></ol>
+      <div class="chat-quick" id="chat-quick"></div>
+      <form class="chat-form" id="chat-form">
+        <label class="sr-only" for="chat-input">Mensaje</label>
+        <input id="chat-input" maxlength="200" placeholder="Escribe un mensaje" autocomplete="off">
+        <button class="btn" type="submit">Enviar</button>
+      </form>
+    </div>
+  </main>
+
+  <dialog id="modal" aria-labelledby="modal-title">
+    <form method="dialog" class="modal-inner" id="modal-inner"></form>
+  </dialog>
+  <div class="snack" id="snack" role="status" aria-live="polite"></div>
+</body>
+</html>
